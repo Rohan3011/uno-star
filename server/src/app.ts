@@ -2,10 +2,8 @@ import express, { Response } from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import { createServer } from "http";
-import { Socket, Server, Namespace } from "socket.io";
-import { roomHandler } from "./handlers/room.handler";
-import { playerHandler } from "./handlers/player.handler";
-import { globalHandler } from "./handlers/global.handler";
+import { Socket, Server } from "socket.io";
+import { getUser } from "./utils/user";
 
 function main() {
   // Load Environment variables
@@ -30,46 +28,49 @@ function main() {
 
   // Init Websocket
   const httpServer = createServer(app);
-  const io = new Server(httpServer, {
-    cors: corsOptions,
-  });
-
-  // Namespaces
-  const GlobalNamespace: Namespace<
+  const io: Server<
     ClientToServerEvents,
     ServerToClientEvents,
     InterServerEvents,
     SocketData
-  > = io.of("/socket-global");
-
-  const roomNamespace: Namespace<
-    RoomClientToServerEvents,
-    RoomServerToClientEvents,
-    RoomInterServerEvents,
-    RoomSocketData
-  > = io.of("/socket-rooms");
-
-  const playerNamespace: Namespace<
-    PlayerClientToServerEvents,
-    PlayerServerToClientEvents,
-    PlayerInterServerEvents,
-    PlayerSocketData
-  > = io.of("/socket-players");
+  > = new Server(httpServer, {
+    cors: corsOptions,
+  });
 
   const onConnection = (socket: Socket) => {
-    // globalHandler(GlobalNamespace, socket);
-    // roomHandler(roomNamespace, socket);
-    // playerHandler(playerNamespace, socket);
-  };
-
-  GlobalNamespace.on("connection", (socket) => {
     socket.on("ping", () => {
       console.log(`[${new Date().toISOString()}]: Ping by ${socket.id}`);
       socket.emit("pong", "connected successfully");
     });
-  });
+
+    socket.on("game:init", (gameState) => {
+      const user = getUser(socket.id);
+      if (user) {
+        io.to(user.roomId).emit("game:init", gameState);
+      }
+    });
+
+    socket.on("game:update", (gameState) => {
+      const user = getUser(socket.id);
+      if (user) io.to(user.roomId).emit("game:update", gameState);
+    });
+
+    // socket.on("message:send", (payload, callback) => {
+    //   const user = getUser(socket.id);
+    //   if (user) {
+    //     io.to(user.roomId).emit("message:send", {
+    //       user: user.userName,
+    //       text: payload.message,
+    //     });
+    //     callback();
+    //   } else {
+    //     socket.emit("message:error", { message: "No such user exists" });
+    //   }
+    // });
+  };
 
   io.on("connection", onConnection);
+  
 
   // Serve and Listen
   httpServer.listen(port, () => {
