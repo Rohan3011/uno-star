@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import io from "socket.io-client";
 
-const socket = io("http://localhost:5000/socket-global");
+const socket = io("http://localhost:5000/");
 
 function App() {
   const [isConnected, setIsConnected] = useState(socket.connected);
@@ -36,10 +36,7 @@ function App() {
     <div>
       <p>Connected: {"" + isConnected}</p>
       <p>Last pong: {lastPong || "-"}</p>
-      <button
-        className="px-6 py-2.5 m-4 bg-blue-500 rounded shadow text-white active:scale-95 transition-transform"
-        onClick={sendPing}
-      >
+      <button className="nes-btn is-primary px-6 py-2.5" onClick={sendPing}>
         <span className="font-medium drop-shadow-md"> Send ping </span>
       </button>
     </div>
