@@ -20,6 +20,6 @@ export type CardType = {
   name: CardImage;
   color: CardColor;
   CardType?: CardValueType;
-  isSpecialCard?: boolean;
-  url: string;
+  isWildCard?: boolean;
+  url?: string;
 };

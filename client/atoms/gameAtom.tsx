@@ -1,6 +1,6 @@
 import { atom } from "recoil";
-import { CardType } from "../@types/card";
-import { PlayerType } from "../@types/player";
+import { CardType } from "../types/card";
+import { PlayerType } from "../types/player";
 
 export const gameOverState = atom({
   key: "GameOver",
