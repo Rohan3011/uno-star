@@ -1,5 +1,5 @@
 import React from "react";
-import { CardType } from "types/card";
+import { CardType } from "@src/types/card";
 
 export type CardDeckProps = {
   cards: CardType[] | undefined;

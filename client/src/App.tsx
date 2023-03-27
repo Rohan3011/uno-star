@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import io from "socket.io-client";
+import Game from "./components/Game";
 
 const socket = io("http://localhost:5000/");
 
@@ -39,6 +40,8 @@ function App() {
       <button className="nes-btn is-primary px-6 py-2.5" onClick={sendPing}>
         <span className="font-medium drop-shadow-md"> Send ping </span>
       </button>
+
+      <Game />
     </div>
   );
 }
