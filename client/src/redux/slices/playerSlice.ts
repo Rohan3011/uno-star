@@ -1,29 +1,26 @@
-import {createSlice, PayloadAction} from '@reduxjs/toolkit';
-import {CardType} from '@src/types/card';
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { CardType } from "@src/types/card";
 
 export type PlayerState = {
-  cards: CardType[]|undefined,
-}
+  cards: CardType[] | undefined;
+};
 
 const initialState: PlayerState = {
-  cards: []
-}
+  cards: [],
+};
 
 export const playerSlice = createSlice({
-  name: 'player',
+  name: "player",
   initialState,
   reducers: {
     setPlayerCards: (state, action: PayloadAction<CardType[]>) => {
-        state.cards = action.payload},
-    pickCard: (state) => {
-
+      state.cards = action.payload;
     },
-    dropCard: (state) => {
+    pickCard: (state) => {},
+    dropCard: (state) => {},
+  },
+});
 
-    }
-  }
-})
-
-export const {setPlayerCards, pickCard, dropCard} = playerSlice.actions;
+export const { setPlayerCards, pickCard, dropCard } = playerSlice.actions;
 
 export default playerSlice.reducer;

@@ -1,8 +1,9 @@
-import express, { Response } from "express";
-import dotenv from "dotenv";
 import cors from "cors";
+import dotenv from "dotenv";
+import express, { Response } from "express";
 import { createServer } from "http";
-import { Socket, Server } from "socket.io";
+import { Server } from "socket.io";
+
 import { getUser } from "./utils/user";
 
 function main() {
@@ -37,11 +38,13 @@ function main() {
     cors: corsOptions,
   });
 
-  const onConnection = (socket: Socket) => {
+  io.on("connection", (socket) => {
     socket.on("ping", () => {
       console.log(`[${new Date().toISOString()}]: Ping by ${socket.id}`);
       socket.emit("pong", "connected successfully");
     });
+
+    socket.on("game:join", () => {});
 
     socket.on("game:init", (gameState) => {
       const user = getUser(socket.id);
@@ -54,23 +57,7 @@ function main() {
       const user = getUser(socket.id);
       if (user) io.to(user.roomId).emit("game:update", gameState);
     });
-
-    // socket.on("message:send", (payload, callback) => {
-    //   const user = getUser(socket.id);
-    //   if (user) {
-    //     io.to(user.roomId).emit("message:send", {
-    //       user: user.userName,
-    //       text: payload.message,
-    //     });
-    //     callback();
-    //   } else {
-    //     socket.emit("message:error", { message: "No such user exists" });
-    //   }
-    // });
-  };
-
-  io.on("connection", onConnection);
-  
+  });
 
   // Serve and Listen
   httpServer.listen(port, () => {

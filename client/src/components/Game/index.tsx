@@ -26,7 +26,7 @@ function Game() {
           <img
             width={50}
             height={100}
-            src={`/public/images/cards/${card.name}`}
+            src={`/images/cards/${card.name}`}
             alt={card.name}
           />
         </div>
