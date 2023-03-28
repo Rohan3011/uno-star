@@ -1,4 +1,4 @@
-const users: SocketData[] = [];
+export const users: SocketData[] = [];
 
 export const addUser = (
   userData: SocketData,

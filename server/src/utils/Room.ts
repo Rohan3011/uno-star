@@ -1,32 +1,40 @@
-import { Server } from "http";
-import { Socket } from "socket.io";
 import { v4 as uuidv4 } from "uuid";
+import { AppServer, AppSocket } from "../app";
+import { Player } from "./Player";
 
 enum RoomEvents {
-  create = "room:create",
-  read = "room:read",
+  join = "room:join",
 }
 
 export class Room {
-  public io;
-  public socket: Socket;
-  public name;
-  public playersCount: number;
-  public players: string[];
+  private io: AppServer;
+  private socket: AppSocket;
+  private id: string;
+  private playersCount: number;
+  private players: string[];
+  private host: Player;
 
-  constructor(io: Server, socket: Socket, players: number = 0) {
+  ROOM_SIZE_LIMIT = 2;
+
+  constructor(
+    io: AppServer,
+    socket: AppSocket,
+    host: Player,
+    players: number = 0
+  ) {
     this.io = io;
     this.socket = socket;
+    this.host = host;
     this.playersCount = players;
     this.players = [];
-    this.name = uuidv4();
+    this.id = uuidv4();
   }
-  createRoom = (payload: any) => {};
+  joinRoom = (p: Player) => {
+    if (this.playersCount >= this.ROOM_SIZE_LIMIT) {
+    }
+  };
   readRoom = (payload: any) => {};
 
   // Socket Events
-  eventsListener = () => {
-    this.socket.on(RoomEvents.create, this.createRoom);
-    this.socket.on(RoomEvents.read, this.readRoom);
-  };
+  eventsListener = () => {};
 }
