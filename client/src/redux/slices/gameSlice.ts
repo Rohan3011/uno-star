@@ -5,6 +5,8 @@ import { PlayerType } from "@src/types/player";
 
 export type GameState = {
   cards: CardType[];
+  player1Cards: CardType[];
+  player2Cards: CardType[];
   isOver: boolean;
   winner?: PlayerType;
   turn?: PlayerType;
@@ -17,6 +19,8 @@ const initialState: GameState = {
   winner: undefined,
   turn: undefined,
   cards: [],
+  player1Cards: [],
+  player2Cards: [],
   activeCard: undefined,
   playedCard: undefined,
 };
@@ -25,12 +29,14 @@ export const gameSlice = createSlice({
   name: "game",
   initialState,
   reducers: {
-    setCardDeck: (state, action: PayloadAction<CardType[]>) => {
-      state.cards = action.payload;
+    initGameState: (state, action: PayloadAction<GameState>) => {
+      state.cards = action.payload.cards;
+      state.player1Cards = action.payload.player1Cards;
+      state.player2Cards = action.payload.player2Cards;
     },
   },
 });
 
-export const { setCardDeck } = gameSlice.actions;
+export const { initGameState } = gameSlice.actions;
 
 export default gameSlice.reducer;

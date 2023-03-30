@@ -2,25 +2,28 @@ import React, { useEffect, useState } from "react";
 import { CARDS } from "@src/data";
 import { initGameHelper } from "@src/utils/helper";
 import { useAppSelector, useAppDispatch } from "@src/redux/hooks";
-import { setCardDeck } from "@src/redux/slices/gameSlice";
-import { setPlayerCards } from "@src/redux/slices/playerSlice";
+import { socket } from "@src/Socket";
+import { initGameState } from "@src/redux/slices/gameSlice";
 
 function Game() {
-  const cardDeck = useAppSelector((state) => state.game.cards);
-  const playerCards = useAppSelector((state) => state.player.cards);
+  const game = useAppSelector((state) => state.game);
 
   const dispatch = useAppDispatch();
 
   useEffect(() => {
     const g = initGameHelper(CARDS);
-    dispatch(setCardDeck(g.remainingCards));
-    dispatch(setPlayerCards(g.playerCards));
-  }, []);
+    dispatch(initGameState(g));
 
+    socket.emit("game:init", g);
+
+    return () => {
+      socket.off("game:init");
+    };
+  }, []);
   return (
     <div>
-      <span>MY Cards</span>
-      {playerCards?.map((card, index) => (
+      <span>Player 1</span>
+      {game.player1Cards?.map((card, index) => (
         <div key={index}>
           <p> {card.name} </p>
           <img
@@ -33,6 +36,17 @@ function Game() {
       ))}
 
       <span>Player 2</span>
+      {game.player2Cards?.map((card, index) => (
+        <div key={index}>
+          <p> {card.name} </p>
+          <img
+            width={50}
+            height={100}
+            src={`/images/cards/${card.name}`}
+            alt={card.name}
+          />
+        </div>
+      ))}
     </div>
   );
 }

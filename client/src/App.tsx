@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from "react";
-import io from "socket.io-client";
 import Game from "./components/Game";
-
-const socket = io("http://localhost:5000/");
+import { socket } from "@src/Socket";
 
 function App() {
   const [isConnected, setIsConnected] = useState(socket.connected);
@@ -22,15 +20,32 @@ function App() {
       setLastPong(new Date().toISOString());
     });
 
+    socket.on("player:status", (data) => {
+      console.log(data?.message);
+    });
+    socket.on("player:info", (data) => {
+      console.log(data);
+    });
+
     return () => {
       socket.off("connect");
       socket.off("disconnect");
       socket.off("pong");
+      socket.off("player:status");
+      socket.off("player:info");
     };
   }, []);
 
   const sendPing = () => {
     socket.emit("ping");
+  };
+
+  const setupPlayer = () => {
+    socket.emit("player:init", "player1");
+  };
+
+  const getPlayerInfo = () => {
+    socket.emit("player:info");
   };
 
   return (
@@ -40,7 +55,15 @@ function App() {
       <button className="nes-btn is-primary px-6 py-2.5" onClick={sendPing}>
         <span className="font-medium drop-shadow-md"> Send ping </span>
       </button>
-
+      <button className="nes-btn is-primary px-6 py-2.5" onClick={setupPlayer}>
+        <span className="font-medium drop-shadow-md"> setup Player </span>
+      </button>
+      <button
+        className="nes-btn is-primary px-6 py-2.5"
+        onClick={getPlayerInfo}
+      >
+        <span className="font-medium drop-shadow-md"> Player Info </span>
+      </button>
       <Game />
     </div>
   );
