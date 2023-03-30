@@ -4,6 +4,7 @@ import { CardType } from "@src/types/card";
 import { PlayerType } from "@src/types/player";
 
 export type GameState = {
+  roomId: string;
   cards: CardType[];
   player1Cards: CardType[];
   player2Cards: CardType[];
@@ -15,6 +16,7 @@ export type GameState = {
 };
 
 const initialState: GameState = {
+  roomId: "",
   isOver: false,
   winner: undefined,
   turn: undefined,
@@ -30,6 +32,7 @@ export const gameSlice = createSlice({
   initialState,
   reducers: {
     initGameState: (state, action: PayloadAction<GameState>) => {
+      state.roomId = action.payload.roomId;
       state.cards = action.payload.cards;
       state.player1Cards = action.payload.player1Cards;
       state.player2Cards = action.payload.player2Cards;

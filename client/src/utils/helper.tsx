@@ -23,11 +23,17 @@ export function packOfCards(deck: CardType[], packSize: number = 7) {
 }
 
 export function initGameHelper(deck: CardType[], packSize: number = 7) {
+  const roomId = makeId();
   let cards = shuffleCards(deck);
   return {
     player1Cards: cards.slice(0, packSize),
     player2Cards: cards.slice(packSize, packSize * 2),
     cards: cards.slice(packSize * 2 + 1),
     activeCard: cards.at(packSize * 2),
+    roomId: roomId,
   } as GameState;
+}
+
+export function makeId() {
+  return Math.random().toString(36).slice(2, 7);
 }

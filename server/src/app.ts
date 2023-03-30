@@ -51,11 +51,20 @@ io.on("connection", (socket) => {
     socket.emit("pong", "connected successfully");
   });
 
-  /**
-   * @event "game:join"
-   * @param {roomID: string}
-   * Event to join a room
-   */
+  socket.on("player:init", (userName) => {
+    socket.data.userName = userName;
+    socket.data.userId = socket.id;
+    socket.data.roomId = undefined;
+    socket.emit("player:status", { message: "Player setup completed!" });
+  });
+
+  socket.on("player:info", () => {
+    socket.emit("player:info", {
+      userName: socket.data.userName,
+      userId: socket.data.userId,
+    });
+  });
+
   socket.on("game:join", (roomId) => {
     if (!doesRoomExist(roomId)) {
       socket.emit("message:error", { message: "No Room Exist!" });
@@ -70,10 +79,11 @@ io.on("connection", (socket) => {
   });
 
   socket.on("game:init", (gameState) => {
-    const user = getUser(socket.id);
-    if (user) {
-      io.to(user.roomId).emit("game:init", gameState);
-    }
+    socket.join(gameState.roomId);
+    socket.data.roomId = gameState.roomId;
+    socket
+      .in(gameState.roomId)
+      .emit("message:send", { message: "Game started Successfully" });
   });
 
   socket.on("game:update", (gameState) => {
