@@ -6,7 +6,7 @@ interface ServerToClientEvents {
   "game:end": (payload: PlayLoad, callback?: Function) => void;
   "message:send": (payload: PlayLoad, callback?: Function) => void;
   "player:status": (payload: PlayLoad) => void;
-  "player:info": (payload: { userName?: string; userId?: string }) => void;
+  "player:info": (payload: SocketData) => void;
 }
 
 interface ClientToServerEvents {
@@ -25,9 +25,9 @@ interface InterServerEvents {
 }
 
 interface SocketData {
-  userId: string;
-  userName: string;
-  roomId: string;
+  userId?: string;
+  userName?: string;
+  roomId?: string;
 }
 
 interface Game {

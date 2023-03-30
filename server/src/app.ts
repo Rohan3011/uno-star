@@ -62,6 +62,7 @@ io.on("connection", (socket) => {
     socket.emit("player:info", {
       userName: socket.data.userName,
       userId: socket.data.userId,
+      roomId: socket.data.roomId,
     });
   });
 
@@ -79,17 +80,23 @@ io.on("connection", (socket) => {
   });
 
   socket.on("game:init", (gameState) => {
+    console.log(`Game init with ${gameState.roomId}`);
     socket.join(gameState.roomId);
+
+    // Set socket data
+    socket.data.userId = socket.data.userId;
+    socket.data.userName = socket.data.userName;
     socket.data.roomId = gameState.roomId;
+
     socket
       .in(gameState.roomId)
       .emit("message:send", { message: "Game started Successfully" });
   });
 
-  socket.on("game:update", (gameState) => {
-    const user = getUser(socket.id);
-    if (user) io.to(user.roomId).emit("game:update", gameState);
-  });
+  // socket.on("game:update", (gameState) => {
+  //   const user = getUser(socket.id);
+  //   if (user) io.to(user.roomId).emit("game:update", gameState);
+  // });
 });
 
 // Serve and Listen
@@ -100,4 +107,11 @@ httpServer.listen(port, () => {
 // utility Methods
 function doesRoomExist(roomId: string) {
   return Boolean(io.sockets.adapter.rooms.get(roomId));
+}
+
+function NumClientsInRoom(roomId: string) {
+  const rooms = io.of("/").adapter.rooms;
+  const roomSockets = rooms.get(roomId);
+  if (roomSockets) return roomSockets.size;
+  else return 0;
 }
