@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import express, { Response } from "express";
 import { createServer } from "http";
 import { Server, Socket } from "socket.io";
+import { distributeCards } from "./utils/game";
 
 import { getUser } from "./utils/user";
 
@@ -22,7 +23,7 @@ const app = express();
 app.use(cors(corsOptions));
 app.use(express.static("public"));
 
-app.get("/healthcheck", (_, res: Response) => {
+app.get("/health", (_, res: Response) => {
   res.send("OK");
 });
 
@@ -72,6 +73,8 @@ io.on("connection", (socket) => {
     }
     try {
       socket.join(roomId);
+      const countPlayers = numClientsInRoom(roomId);
+      socket.emit("game:join", countPlayers);
     } catch (err) {
       socket.emit("message:error", {
         message: "Failed to join! please try again",
@@ -79,18 +82,36 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("game:init", (gameState) => {
-    console.log(`Game init with ${gameState.roomId}`);
-    socket.join(gameState.roomId);
+  socket.on("game:init", (game) => {
+    console.log(`Game init with ${game.roomId}`);
 
-    // Set socket data
-    socket.data.userId = socket.data.userId;
-    socket.data.userName = socket.data.userName;
-    socket.data.roomId = gameState.roomId;
+    try {
+      // Set socket data
+      socket.data.userId = socket.data.userId;
+      socket.data.userName = socket.data.userName;
+      socket.data.roomId = game.roomId;
 
-    socket
-      .in(gameState.roomId)
-      .emit("message:send", { message: "Game started Successfully" });
+      socket.emit("game:init", game);
+    } catch (err) {
+      socket.emit("message:error", { message: JSON.stringify(err) });
+    }
+  });
+
+  socket.on("game:start", (game) => {
+    console.log(`Game started with ${game.roomId}`);
+
+    try {
+      if (game.players.size >= 2) {
+        distributeCards(game);
+        socket.in(game.roomId).emit("game:start", game);
+      } else {
+        socket
+          .in(game.roomId)
+          .emit("message:error", { message: "Wait for others to join" });
+      }
+    } catch (err) {
+      socket.emit("message:error", { message: JSON.stringify(err) });
+    }
   });
 
   // socket.on("game:update", (gameState) => {
@@ -109,7 +130,7 @@ function doesRoomExist(roomId: string) {
   return Boolean(io.sockets.adapter.rooms.get(roomId));
 }
 
-function NumClientsInRoom(roomId: string) {
+function numClientsInRoom(roomId: string) {
   const rooms = io.of("/").adapter.rooms;
   const roomSockets = rooms.get(roomId);
   if (roomSockets) return roomSockets.size;
