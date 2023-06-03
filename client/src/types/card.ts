@@ -16,7 +16,7 @@ export type CardValueType =
 
 export type CardImage = `${CardColor}_${CardValueType}.png`;
 
-export type CardType = {
+export type Card = {
   name: CardImage;
   color: CardColor;
   CardType?: CardValueType;

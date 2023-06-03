@@ -1,8 +1,8 @@
 import React from "react";
-import { CardType } from "@src/types/card";
+import { Card } from "@src/types/card";
 
 export type CardDeckProps = {
-  cards: CardType[] | undefined;
+  cards: Card[] | undefined;
   isStacked: boolean;
 };
 

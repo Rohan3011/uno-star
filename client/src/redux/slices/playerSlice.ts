@@ -1,8 +1,8 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { CardType } from "@src/types/card";
+import { Card } from "@src/types/card";
 
 export type PlayerState = {
-  cards: CardType[] | undefined;
+  cards: Card[] | undefined;
 };
 
 const initialState: PlayerState = {
@@ -13,7 +13,7 @@ export const playerSlice = createSlice({
   name: "player",
   initialState,
   reducers: {
-    setPlayerCards: (state, action: PayloadAction<CardType[]>) => {
+    setPlayerCards: (state, action: PayloadAction<Card[]>) => {
       state.cards = action.payload;
     },
     pickCard: (state) => {},
