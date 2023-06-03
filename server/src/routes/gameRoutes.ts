@@ -1,15 +1,11 @@
 import { Request, Response, Router } from "express";
 import { GameHelper, generateGameId, generatePlayerId } from "../lib/utils";
+import { GameState, GameStatus } from "../types/public";
 
 const router = Router();
 
 const activeGames: Record<string, GameState> = {};
 
-/** 
- * Create a new game.
- *  Request body: None
-    Response: Returns the generated game ID and other relevant information.
- */
 router.post("/games", (req: Request, res: Response) => {
   // Generate a unique game ID
   const gameId = generateGameId();
@@ -35,21 +31,31 @@ router.post("/games", (req: Request, res: Response) => {
   res.json({ gameId });
 });
 
-/**
- * GET /api/games/:gameId: Get the details of a specific game.
+router.get("/games", (req: Request, res: Response) => {
+  const allGames = Object.keys(activeGames);
+  res.json({ Games: allGames });
+});
 
-    Request parameters: gameId (string)
-    Response: Returns the game state and other relevant information.
- */
-router.get("/games/:gameId", (req: Request, res: Response) => {});
+router.get("/games/:gameId", (req: Request, res: Response) => {
+  const gameId = req.params.gameId;
 
-/**
- * POST /api/games/:gameId/join: Join an existing game.
+  const game = activeGames[gameId];
 
-    Request parameters: gameId (string)
-    Request body: Player's name
-    Response: Returns the player ID and other relevant information.
- */
+  if (!game) {
+    // Game not found
+    return res.status(404).json({ error: "Game not found" });
+  }
+
+  // Check if the game is in progress
+  if (game.status === GameStatus.Finished) {
+    return res
+      .status(403)
+      .json({ error: "Game has Finished. Cannot join now." });
+  }
+
+  res.send(game);
+});
+
 router.post("/games/:gameId/join", (req: Request, res: Response) => {
   const gameId = req.params.gameId;
   const playerId = generatePlayerId();
@@ -72,7 +78,7 @@ router.post("/games/:gameId/join", (req: Request, res: Response) => {
   // Create a new player object
   const newPlayer = {
     id: playerId,
-    name: req.body.name,
+    name: req.body?.name ?? "no-name",
     hand: [],
     score: 0,
     // Other player-specific properties
@@ -85,11 +91,29 @@ router.post("/games/:gameId/join", (req: Request, res: Response) => {
   res.json({ playerId });
 });
 
-/**
- *     GET /api/games/:gameId/socket: Establish a WebSocket connection for a specific game.
-        Request parameters: gameId (string)
-        Response: Upgrade the connection to a WebSocket connection.
- */
 router.post("/games/:gameId/socket", (req: Request, res: Response) => {});
 
-export { router as GameRouter };
+router.post("/games/:gameId/start", (req: Request, res: Response) => {
+  const gameId = req.params.gameId;
+  const game = activeGames[gameId];
+
+  if (!game) {
+    // Game not found
+    return false;
+  }
+  const numPlayers = game.players.length;
+
+  if (!game) {
+    res.status(400).send({ error: "Game could not be started" });
+  } else if (numPlayers < 2 || numPlayers > 7) {
+    res.status(400).send({
+      error: `INSUFFICIENT PLAYERS! Min 2 players are required, but only ${numPlayers} are present`,
+    });
+  } else {
+    // Update the game status to "in-progress"
+    game.status = GameStatus.InProgress;
+    res.send({ message: "Game started" });
+  }
+});
+
+export { router as gameRouter };

@@ -1,4 +1,4 @@
-enum CardColor {
+export enum CardColor {
   Red = "red",
   Blue = "blue",
   Green = "green",
@@ -6,7 +6,7 @@ enum CardColor {
   Wild = "wild",
 }
 
-enum CardValue {
+export enum CardValue {
   Zero = "0",
   One = "1",
   Two = "2",
@@ -22,14 +22,14 @@ enum CardValue {
   DrawTwo = "draw-two",
 }
 
-const cardColors: CardColor[] = [
+export const cardColors: CardColor[] = [
   CardColor.Red,
   CardColor.Blue,
   CardColor.Green,
   CardColor.Yellow,
 ];
 
-const cardValues: CardValue[] = [
+export const cardValues: CardValue[] = [
   CardValue.Zero,
   CardValue.One,
   CardValue.Two,

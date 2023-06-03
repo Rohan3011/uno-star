@@ -1,13 +1,17 @@
+import { v4 } from "uuid";
+
+import { CardColor, CardValue, cardColors, cardValues } from "../data";
+
 export function generateGameId(): string {
   // Generate a unique game ID
   // Implementation goes here
-  return "unique_game_id";
+  return "game-" + v4().substring(0, 6);
 }
 
 export function generatePlayerId(): string {
   // Generate a unique player ID
   // Implementation goes here
-  return "unique_player_id";
+  return "player-" + v4().substring(0, 6);
 }
 
 export namespace GameHelper {

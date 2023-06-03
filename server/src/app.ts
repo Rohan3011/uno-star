@@ -4,8 +4,7 @@ import express, { Response } from "express";
 import { createServer } from "http";
 import { Server, Socket } from "socket.io";
 import { distributeCards } from "./utils/game";
-
-import { getUser } from "./utils/user";
+import { gameRouter } from "./routes/gameRoutes";
 
 // Load Environment variables
 dotenv.config();
@@ -22,6 +21,7 @@ const app = express();
 // Middleware
 app.use(cors(corsOptions));
 app.use(express.static("public"));
+app.use("/api", gameRouter);
 
 app.get("/health", (_, res: Response) => {
   res.send("OK");
@@ -52,29 +52,29 @@ io.on("connection", (socket) => {
     socket.emit("pong", "connected successfully");
   });
 
-  socket.on("player:init", (userName) => {
-    socket.data.userName = userName;
-    socket.data.userId = socket.id;
-    socket.data.roomId = undefined;
-    socket.emit("player:status", { message: "Player setup completed!" });
-  });
+  // 🔴
+  // socket.on("player:init", (userName) => {
+  //   socket.data.userName = userName;
+  //   socket.data.userId = socket.id;
+  //   socket.data.roomId = undefined;
+  //   socket.emit("player:status", { message: "Player setup completed!" });
+  // });
 
-  socket.on("player:info", () => {
-    socket.emit("player:info", {
-      userName: socket.data.userName,
-      userId: socket.data.userId,
-      roomId: socket.data.roomId,
-    });
-  });
+  // socket.on("player:info", () => {
+  //   socket.emit("player:info", {
+  //     userName: socket.data.userName,
+  //     userId: socket.data.userId,
+  //     roomId: socket.data.roomId,
+  //   });
+  // });
 
-  socket.on("game:join", (roomId) => {
+  socket.on("game:join", (roomId, playerId) => {
     if (!doesRoomExist(roomId)) {
       socket.emit("message:error", { message: "No Room Exist!" });
     }
     try {
       socket.join(roomId);
-      const countPlayers = numClientsInRoom(roomId);
-      socket.emit("game:join", countPlayers);
+      socket.to(roomId).emit("player:joined", playerId);
     } catch (err) {
       socket.emit("message:error", {
         message: "Failed to join! please try again",
@@ -82,20 +82,21 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("game:init", (game) => {
-    console.log(`Game init with ${game.roomId}`);
+  // 🔴
+  // socket.on("game:init", (game) => {
+  //   console.log(`Game init with ${game.roomId}`);
 
-    try {
-      // Set socket data
-      socket.data.userId = socket.data.userId;
-      socket.data.userName = socket.data.userName;
-      socket.data.roomId = game.roomId;
+  //   try {
+  //     // Set socket data
+  //     socket.data.userId = socket.data.userId;
+  //     socket.data.userName = socket.data.userName;
+  //     socket.data.roomId = game.roomId;
 
-      socket.emit("game:init", game);
-    } catch (err) {
-      socket.emit("message:error", { message: JSON.stringify(err) });
-    }
-  });
+  //     socket.emit("game:init", game);
+  //   } catch (err) {
+  //     socket.emit("message:error", { message: JSON.stringify(err) });
+  //   }
+  // });
 
   socket.on("game:start", (game) => {
     console.log(`Game started with ${game.roomId}`);

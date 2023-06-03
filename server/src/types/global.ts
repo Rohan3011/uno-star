@@ -9,13 +9,14 @@ interface ServerToClientEvents {
   "message:send": (payload: PlayLoad, callback?: Function) => void;
   "player:status": (payload: PlayLoad) => void;
   "player:info": (payload: SocketData) => void;
+  "player:joined": (playerId: string) => void;
 }
 
 interface ClientToServerEvents {
   ping: () => void;
   "player:init": (userName: string) => void;
   "player:info": () => void;
-  "game:join": (roomID: string, callback?: Function) => void;
+  "game:join": (roomId: string, playerId: string, callback?: Function) => void;
   "game:init": (gameState: Game) => void;
   "game:start": (gameState: Game) => void;
   "game:update": (gameState: Game) => void;
