@@ -31,3 +31,46 @@ If you play an action card, you can affect the game in different ways. A skip ca
 When you have only one card left in your hand, you have to say “UNO” before playing it. If another player catches you not saying “UNO”, they can challenge you and make you draw two penalty cards1. The first player who plays all their cards wins the game.
 
 I hope this explanation helps you understand how to play UNO game.
+
+## Control Flow
+
+visit the site -> create a game -> click start -> game begins
+-> join a game -> wait for game to begin -> game begins
+
+## Project Structure
+
+```md
+- server/
+
+  - src/
+    - controllers/
+      - gameController.js
+      - playerController.js
+    - models/
+      - gameModel.js
+      - playerModel.js
+    - routes/
+      - gameRoutes.js
+      - playerRoutes.js
+    - services/
+      - gameService.js
+      - playerService.js
+    - utils/
+      - websocketUtil.js
+    - app.js
+    - server.js
+
+- client/
+  - public/
+    - index.html
+  - src/
+    - components/
+      - GameBoard.js
+      - PlayerHand.js
+      - ...
+    - services/
+      - apiService.js
+      - websocketService.js
+    - App.js
+    - index.js
+```
