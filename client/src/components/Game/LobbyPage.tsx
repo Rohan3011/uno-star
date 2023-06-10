@@ -4,7 +4,7 @@ import { GameState, startGame } from "@src/redux/slices/gameSlice";
 import React, { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-function GamePage() {
+function LobbyPage() {
   const { gameId } = useParams();
   const navigate = useNavigate();
   const game = useAppSelector((state) => state.game);
@@ -12,11 +12,7 @@ function GamePage() {
   const dispatch = useAppDispatch();
 
   useEffect(() => {
-    socket.connect();
-    return () => {
-      console.log("DISCONNECTED");
-      socket.disconnect();
-    };
+    socket.emit("game:join", gameId, "xyz");
   }, []);
 
   useEffect(() => {
@@ -69,4 +65,4 @@ function GamePage() {
   );
 }
 
-export default GamePage;
+export default LobbyPage;

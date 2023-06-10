@@ -6,7 +6,8 @@ function CreateOrJoinGame() {
   const [gameId, setGameId] = useState("");
 
   const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setGameId(e.target.value);
+    let _gameId = e.target.value;
+    setGameId(_gameId.trim());
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -14,9 +15,23 @@ function CreateOrJoinGame() {
     navigate(`/game/${gameId}`);
   };
 
-  const createGame = () => {
-    navigate(`/game`);
-  };
+  async function createGame() {
+    const response = await fetch("http://localhost:5000/api/games", {
+      method: "POST",
+    });
+    const data = await response.json();
+
+    const _gameId: string = data.gameId;
+
+    // Process the game ID and navigate to the game lobby or wait for other players
+    // Example: redirect to the lobby page with the game ID in the URL
+    navigate(`game/${_gameId}`);
+    console.log(data);
+  }
+
+  function handleJoin() {
+    navigate(`game/${gameId}`);
+  }
 
   return (
     <div className="nes-container with-title is-centered">
@@ -37,7 +52,11 @@ function CreateOrJoinGame() {
             onChange={handleInput}
           />
         </div>
-        <button type="submit" className="nes-btn is-primary">
+        <button
+          type="submit"
+          className="nes-btn is-primary"
+          onClick={handleJoin}
+        >
           Join
         </button>
       </form>

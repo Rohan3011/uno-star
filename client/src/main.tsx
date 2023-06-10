@@ -6,7 +6,7 @@ import "./index.css";
 import { Provider as ReduxProvider } from "react-redux";
 import store from "./redux/store";
 import GamePage from "./components/Game/GamePage";
-import JoinGame from "./components/Game/JoinGame";
+import LobbyPage from "./components/Game/LobbyPage";
 
 const router = createBrowserRouter([
   {
@@ -19,7 +19,11 @@ const router = createBrowserRouter([
   },
   {
     path: "/game/:gameId",
-    element: <JoinGame />,
+    element: <GamePage />,
+  },
+  {
+    path: "/lobby/:gameId",
+    element: <LobbyPage />,
   },
 ]);
 

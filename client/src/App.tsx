@@ -3,9 +3,11 @@ import CreateOrJoinGame from "./components/CreateOrJoinGame";
 
 function App() {
   return (
-    <div>
-      <CreateOrJoinGame />
-    </div>
+    <main className="mx-auto max-w-4xl pt-12">
+      <div className="p-1">
+        <CreateOrJoinGame />
+      </div>
+    </main>
   );
 }
 

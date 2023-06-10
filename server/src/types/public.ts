@@ -72,7 +72,7 @@ export interface GameState {
    * The currently active color (if a wild card has been played).
    */
   activeColor: string | null;
-
+  host: string;
   status: GameStatus;
 }
 

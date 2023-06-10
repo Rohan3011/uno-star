@@ -1,10 +1,9 @@
 import { Request, Response, Router } from "express";
 import { GameHelper, generateGameId, generatePlayerId } from "../lib/utils";
 import { GameState, GameStatus } from "../types/public";
+import { activeGames } from "../app";
 
 const router = Router();
-
-const activeGames: Record<string, GameState> = {};
 
 router.post("/games", (req: Request, res: Response) => {
   // Generate a unique game ID
@@ -19,6 +18,8 @@ router.post("/games", (req: Request, res: Response) => {
     discardPile: [],
     deck: GameHelper.createDeck(),
     activeColor: null,
+
+    host: "",
   } satisfies GameState;
 
   // Shuffle the deck of cards
@@ -90,8 +91,6 @@ router.post("/games/:gameId/join", (req: Request, res: Response) => {
   // Send the player ID as the response
   res.json({ playerId });
 });
-
-router.post("/games/:gameId/socket", (req: Request, res: Response) => {});
 
 router.post("/games/:gameId/start", (req: Request, res: Response) => {
   const gameId = req.params.gameId;

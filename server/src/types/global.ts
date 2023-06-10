@@ -2,8 +2,8 @@ interface ServerToClientEvents {
   pong: (message: string) => string;
   "message:error": (payload: PlayLoad, callback?: Function) => void;
   "game:init": (gameState: Game) => void;
-  "game:start": (gameState: Game) => void;
-  "game:join": (data: number) => void;
+  "game:start": (gameState: GameState) => void;
+  "game:join": (playerName: string) => void;
   "game:update": (gameState: Game) => void;
   "game:end": (payload: PlayLoad, callback?: Function) => void;
   "message:send": (payload: PlayLoad, callback?: Function) => void;
@@ -18,7 +18,7 @@ interface ClientToServerEvents {
   "player:info": () => void;
   "game:join": (roomId: string, playerId: string, callback?: Function) => void;
   "game:init": (gameState: Game) => void;
-  "game:start": (gameState: Game) => void;
+  "game:start": (gameId: string) => void;
   "game:update": (gameState: Game) => void;
   "game:end": (payload: PlayLoad, callback: Function) => void;
   "message:send": (payload: PlayLoad, callback: Function) => void;
@@ -133,6 +133,8 @@ interface GameState {
   activeColor: string | null;
 
   status: GameStatus;
+
+  host: string;
 }
 
 enum GameStatus {

@@ -5,6 +5,7 @@ import { createServer } from "http";
 import { Server, Socket } from "socket.io";
 import { distributeCards } from "./utils/game";
 import { gameRouter } from "./routes/gameRoutes";
+import { GameStatus } from "./types/public";
 
 // Load Environment variables
 dotenv.config();
@@ -46,40 +47,51 @@ export type AppSocket = typeof Socket<
   SocketData
 >;
 
+export const activeGames: Record<string, GameState> = {};
+
 io.on("connection", (socket) => {
   socket.on("ping", () => {
     console.log(`[${new Date().toISOString()}]: Ping by ${socket.id}`);
     socket.emit("pong", "connected successfully");
   });
 
-  // 🔴
-  // socket.on("player:init", (userName) => {
-  //   socket.data.userName = userName;
-  //   socket.data.userId = socket.id;
-  //   socket.data.roomId = undefined;
-  //   socket.emit("player:status", { message: "Player setup completed!" });
-  // });
+  socket.on("game:join", (gameId, playerName) => {
+    const playerId = socket.id;
 
-  // socket.on("player:info", () => {
-  //   socket.emit("player:info", {
-  //     userName: socket.data.userName,
-  //     userId: socket.data.userId,
-  //     roomId: socket.data.roomId,
-  //   });
-  // });
+    // Find the game by its ID
+    const game = activeGames[gameId];
 
-  socket.on("game:join", (roomId, playerId) => {
-    if (!doesRoomExist(roomId)) {
-      socket.emit("message:error", { message: "No Room Exist!" });
-    }
-    try {
-      socket.join(roomId);
-      socket.to(roomId).emit("player:joined", playerId);
-    } catch (err) {
+    if (!game) {
       socket.emit("message:error", {
-        message: "Failed to join! please try again",
+        message: "Joining Failed! Game not found",
+      });
+      return;
+    }
+
+    // Check if the game is in progress
+    if (game.status === GameStatus.InProgress) {
+      socket.emit("message:error", {
+        message: "Game in progress. Cannot join now.",
       });
     }
+
+    // Create a new player object
+    const newPlayer = {
+      id: playerId,
+      name: playerName ?? "no-name",
+      hand: [],
+      score: 0,
+      // Other player-specific properties
+    } satisfies Player;
+
+    // Add the player to the game
+    game.players.push(newPlayer);
+
+    // Join the game
+    socket.join(gameId);
+
+    // Send the player ID as the response
+    socket.to(gameId).emit("game:join", playerName);
   });
 
   // 🔴
@@ -98,20 +110,25 @@ io.on("connection", (socket) => {
   //   }
   // });
 
-  socket.on("game:start", (game) => {
-    console.log(`Game started with ${game.roomId}`);
+  socket.on("game:start", (gameId) => {
+    console.log(`Game started with ID: ${gameId}`);
 
-    try {
-      if (game.players.size >= 2) {
-        distributeCards(game);
-        socket.in(game.roomId).emit("game:start", game);
-      } else {
-        socket
-          .in(game.roomId)
-          .emit("message:error", { message: "Wait for others to join" });
-      }
-    } catch (err) {
-      socket.emit("message:error", { message: JSON.stringify(err) });
+    const game = activeGames[gameId];
+
+    if (!game) {
+      socket.in(gameId).emit("message:error", { message: "Game not found" });
+      return;
+    }
+    const numPlayers = game.players.length;
+
+    if (numPlayers < 2 || numPlayers > 7) {
+      socket
+        .in(gameId)
+        .emit("message:error", { message: "Wait for others to join" });
+    } else {
+      // Update the game status to "in-progress"
+      game.status = GameStatus.InProgress;
+      socket.in(gameId).emit("game:start", game);
     }
   });
 

@@ -4,26 +4,34 @@ import { socket } from "@src/Socket";
 import { startGameHelper } from "@src/utils/helper";
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 
 function JoinGame() {
   const { gameId } = useParams();
-  const game = useAppSelector((state) => state.game);
-  const dispatch = useAppDispatch();
-  const [players, setPlayers] = useState();
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    socket.emit("game:join", gameId);
-    socket.on("game:join", (g) => {
-      console.log(g);
+  const [playerName, setPlayerName] = useState("");
+
+  async function joinGame(playerName: string = "padladso") {
+    const response = await fetch(`/api/games/${gameId}/join`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: playerName }),
     });
-  }, []);
 
-  useEffect(() => console.log(players), [players]);
+    const data = await response.json();
 
-  const socketStartGame = () => {
-    const _game = startGameHelper(game);
-    dispatch(startGame(_game));
+    const playerId: string = data.playerId;
+    window.location.href = `/lobby?gameId=${gameId}&playerId=${playerId}`;
+  }
+
+  const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPlayerName(e.target.value);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    navigate(`/game/${gameId}`);
   };
 
   return (
@@ -31,35 +39,23 @@ function JoinGame() {
       <h1>Game id : {gameId}</h1>
       <h1>Player id : {socket.id}</h1>
       <h1>Waiting for host to start the game</h1>
+
+      <form onSubmit={handleSubmit}>
+        <div className="nes-field">
+          <label htmlFor="name_field">Game Code</label>
+          <input
+            type="text"
+            id="name_field"
+            className="nes-input"
+            onChange={handleInput}
+          />
+        </div>
+        <button type="submit" className="nes-btn is-primary">
+          Join
+        </button>
+      </form>
     </div>
   );
-}
-
-async function createGame(): Promise<void> {
-  const response = await fetch("/api/games", { method: "POST" });
-  const data = await response.json();
-
-  const gameId: string = data.gameId;
-
-  // Process the game ID and navigate to the game lobby or wait for other players
-  // Example: redirect to the lobby page with the game ID in the URL
-  window.location.href = `/lobby?gameId=${gameId}`;
-}
-
-async function joinGame(gameId: string, playerName: string): Promise<void> {
-  const response = await fetch(`/api/games/${gameId}/join`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name: playerName }),
-  });
-
-  const data = await response.json();
-
-  const playerId: string = data.playerId;
-
-  // Process the player ID and navigate to the game lobby or wait for the game to start
-  // Example: redirect to the lobby page with the game ID and player ID in the URL
-  window.location.href = `/lobby?gameId=${gameId}&playerId=${playerId}`;
 }
 
 export default JoinGame;
