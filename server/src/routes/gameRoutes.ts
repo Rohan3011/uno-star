@@ -1,7 +1,7 @@
 import { Request, Response, Router } from "express";
 import { GameHelper, generateGameId, generatePlayerId } from "../lib/utils";
-import { GameState, GameStatus } from "../types/public";
 import { activeGames } from "../app";
+import { GameStatus } from "../types/public";
 
 const router = Router();
 
@@ -18,7 +18,7 @@ router.post("/games", (req: Request, res: Response) => {
     discardPile: [],
     deck: GameHelper.createDeck(),
     activeColor: null,
-
+    activeCard: undefined,
     host: "",
   } satisfies GameState;
 
@@ -61,6 +61,8 @@ router.post("/games/:gameId/join", (req: Request, res: Response) => {
   const gameId = req.params.gameId;
   const playerId = generatePlayerId();
 
+  console.log(req.body);
+
   // Find the game by its ID
   const game = activeGames[gameId];
 
@@ -79,7 +81,7 @@ router.post("/games/:gameId/join", (req: Request, res: Response) => {
   // Create a new player object
   const newPlayer = {
     id: playerId,
-    name: req.body?.name ?? "no-name",
+    name: req.body?.name || "no-name",
     hand: [],
     score: 0,
     // Other player-specific properties
@@ -98,7 +100,7 @@ router.post("/games/:gameId/start", (req: Request, res: Response) => {
 
   if (!game) {
     // Game not found
-    return false;
+    res.status(404).send({ message: "Game not found" });
   }
   const numPlayers = game.players.length;
 
@@ -111,7 +113,13 @@ router.post("/games/:gameId/start", (req: Request, res: Response) => {
   } else {
     // Update the game status to "in-progress"
     game.status = GameStatus.InProgress;
-    res.send({ message: "Game started" });
+
+    game.players.map((player) => {
+      const pack = game.deck.splice(0, 7);
+      player.hand = pack;
+    });
+
+    res.send({ message: "Game started", game });
   }
 });
 

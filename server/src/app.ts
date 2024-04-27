@@ -5,7 +5,6 @@ import { createServer } from "http";
 import { Server, Socket } from "socket.io";
 import { distributeCards } from "./utils/game";
 import { gameRouter } from "./routes/gameRoutes";
-import { GameStatus } from "./types/public";
 
 // Load Environment variables
 dotenv.config();
@@ -21,6 +20,7 @@ const app = express();
 
 // Middleware
 app.use(cors(corsOptions));
+app.use(express.json());
 app.use(express.static("public"));
 app.use("/api", gameRouter);
 
@@ -61,6 +61,8 @@ io.on("connection", (socket) => {
     // Find the game by its ID
     const game = activeGames[gameId];
 
+    console.log("GAMES: ", activeGames);
+
     if (!game) {
       socket.emit("message:error", {
         message: "Joining Failed! Game not found",
@@ -73,6 +75,7 @@ io.on("connection", (socket) => {
       socket.emit("message:error", {
         message: "Game in progress. Cannot join now.",
       });
+      return;
     }
 
     // Create a new player object
@@ -89,7 +92,7 @@ io.on("connection", (socket) => {
 
     // Join the game
     socket.join(gameId);
-
+    console.log(`New player joined in ${gameId}\n`, newPlayer);
     // Send the player ID as the response
     socket.to(gameId).emit("game:join", playerName);
   });
@@ -115,21 +118,26 @@ io.on("connection", (socket) => {
 
     const game = activeGames[gameId];
 
+    console.log("ROOMS", io.sockets.adapter.rooms);
+
     if (!game) {
       socket.in(gameId).emit("message:error", { message: "Game not found" });
       return;
     }
-    const numPlayers = game.players.length;
 
-    if (numPlayers < 2 || numPlayers > 7) {
-      socket
-        .in(gameId)
-        .emit("message:error", { message: "Wait for others to join" });
-    } else {
-      // Update the game status to "in-progress"
-      game.status = GameStatus.InProgress;
-      socket.in(gameId).emit("game:start", game);
-    }
+    game.status = GameStatus.InProgress;
+    socket.to(gameId).emit("game:start", game);
+
+    // const numPlayers = game.players.length;
+    // if (numPlayers < 2 || numPlayers > 7) {
+    //   socket
+    //     .in(gameId)
+    //     .emit("message:error", { message: "Wait for others to join" });
+    // } else {
+    //   // Update the game status to "in-progress"
+    //   game.status = GameStatus.InProgress;
+    //   socket.emit("game:start", game);
+    // }
   });
 
   // socket.on("game:update", (gameState) => {

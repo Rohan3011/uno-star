@@ -1,8 +1,8 @@
-export type CardColor = "Red" | "Green" | "Blue" | "Yellow";
+export type CardColor = "red" | "green" | "blue" | "yellow";
 export type CardValueType =
-  | "Draw"
-  | "Reverse"
-  | "Skip"
+  | "draw-two"
+  | "reverse"
+  | "skip"
   | "0"
   | "1"
   | "2"
@@ -16,10 +16,22 @@ export type CardValueType =
 
 export type CardImage = `${CardColor}_${CardValueType}.png`;
 
-export type Card = {
-  name: CardImage;
-  color: CardColor;
-  CardType?: CardValueType;
-  isWildCard?: boolean;
-  url?: string;
-};
+// export type Card = {
+//   name: CardImage;
+//   color: CardColor;
+//   CardType?: CardValueType;
+//   isWildCard?: boolean;
+//   url?: string;
+// };
+
+export interface Card {
+  /**
+   * The color of the card.
+   */
+  color: string;
+
+  /**
+   * The value or special action of the card.
+   */
+  value: string;
+}

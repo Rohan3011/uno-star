@@ -49,7 +49,7 @@ export namespace GameHelper {
 
     for (let i = 0; i < numPlayers; i++) {
       const player = game.players[i];
-      if (player.hand.length === 0)
+      if (player.hand && player.hand.length === 0)
         player.hand = game.deck.splice(0, numCardsPerPlayer);
     }
   }

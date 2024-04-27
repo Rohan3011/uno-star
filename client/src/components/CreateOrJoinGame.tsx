@@ -42,6 +42,8 @@ function CreateOrJoinGame() {
           Create
         </button>
       </div>
+
+      <br />
       <form onSubmit={handleSubmit}>
         <div className="nes-field">
           <label htmlFor="name_field">Game Code</label>

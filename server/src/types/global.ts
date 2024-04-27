@@ -74,7 +74,7 @@ interface Player {
   /**
    * The cards held by the player.
    */
-  hand: Card[];
+  hand: Card[] | null;
 
   /**
    * The score of the player in the game.
@@ -135,6 +135,7 @@ interface GameState {
   status: GameStatus;
 
   host: string;
+  activeCard?: Card;
 }
 
 enum GameStatus {

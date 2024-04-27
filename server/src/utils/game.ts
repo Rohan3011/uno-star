@@ -1,18 +1,19 @@
-export function distributeCards(game: Game) {
+export function distributeCards(game: GameState) {
   // shuffle the cards
-  let cards = shuffleCards(game.cards);
+  let cards = shuffleCards(game.deck);
 
   // distribute the cards
   for (const player of game.players) {
-    const playerCards = cards.splice(0, 7);
-    game.players.set(player[0], playerCards);
+    player.hand = cards.splice(0, 7);
   }
 
   //   set active card
   game.activeCard = cards.shift();
 
   // place remaining in deck
-  game.cards = cards;
+  game.deck = cards;
+
+  game.currentPlayer = game.players[0];
 }
 
 export function pickRandomCard(deck: Card[]) {
